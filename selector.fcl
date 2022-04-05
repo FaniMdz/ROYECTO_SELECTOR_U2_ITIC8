@@ -1,0 +1,78 @@
+FUNCTION_BLOCK selector	// 
+
+// Define input variables
+VAR_INPUT				
+	tamano : REAL;
+	tipofruta : REAL;
+	color : REAL;
+	textura : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	estado : REAL;
+END_VAR
+
+// Fuzzify input variable 'tamano': {'pequeno', 'mediano' , 'grande'}
+FUZZIFY tamano		
+	TERM pequeno := (1,0) (20,1) (35,0) ; 
+	TERM mediano := (30,0) (50,1) (65,0) ;
+	TERM grande :=  (60,0) (80,1) (100,0);
+END_FUZZIFY
+
+// Fuzzify input variable 'tipofruta': {'acida', 'dulce' , 'neutra'}
+FUZZIFY tipofruta		
+	TERM acida := (0,0) (1.2,1) (2.5,0); 
+	TERM dulce := (2,0) (3,1) (4.3,0);
+	TERM neutra :=  (3.8,0) (4.8,1) (6,0);
+END_FUZZIFY
+
+// Fuzzify input variable color: { 'muydesfasado', 'desfasado', 'ideal' }
+FUZZIFY color			
+	TERM muydesfasado := (1,0) (20,1) (35,0) ;
+	TERM desfasado := (30,0) (50,1) (65,0) ;
+	TERM ideal := (60,0) (80,1) (100,0);
+END_FUZZIFY
+
+// Fuzzify input variable textura: { 'rasposa', 'suave', 'dura' }
+FUZZIFY textura			
+	TERM rasposa := (0,0) (5,1) (10,0) ;
+	TERM suave := (8,0) (14,1) (20,0) ;
+	TERM dura := (18,0) (24,1) (30,0);
+END_FUZZIFY
+
+// Defzzzify output variable 'estado' : { 'medio', 'bueno',  'medio',  'malo', }
+DEFUZZIFY estado			
+	TERM bueno := (0, 1) (4, 0) ; 
+	TERM medio := (1, 0) (4,1) (6,1) (10,0);
+	TERM malo := (6, 0) (10, 1);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	RULE 1 : IF (tamano IS pequeno) AND (tipofruta IS neutra) THEN estado IS malo;
+	RULE 2 : IF (tamano IS grande) AND (tipofruta IS acida) THEN estado IS medio;
+	RULE 3 : IF (tamano IS mediano) AND (tipofruta IS dulce) THEN estado IS bueno;
+
+	RULE 4 : IF (tamano IS pequeno) AND (color IS muydesfasado) THEN estado IS malo;
+	RULE 5 : IF (tamano IS grande) AND (color IS desfasado) THEN estado IS medio;
+	RULE 6 : IF (tamano IS mediano) AND (color IS ideal) THEN estado IS bueno;
+
+	RULE 7 : IF (tamano IS grande) AND (color IS muydesfasado) THEN estado IS malo;
+	RULE 8 : IF (tamano IS mediano) AND (color IS desfasado) THEN estado IS medio;
+	RULE 9 : IF (tamano IS pequeno) AND (color IS ideal) THEN estado IS bueno;
+
+    RULE 10 : IF (tamano IS pequeno) AND (textura IS rasposa) THEN estado IS malo;
+	RULE 11 : IF (tamano IS grande) AND (textura IS suave) THEN estado IS medio;
+	RULE 12 : IF (tamano IS mediano) AND (textura IS dura) THEN estado IS bueno;
+	
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
